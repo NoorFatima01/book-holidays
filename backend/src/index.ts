@@ -3,6 +3,8 @@ import cors from "cors";
 import "dotenv/config";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+import userRoutes from "./routes/users";
+import authRoutes from "./routes/auth";
 
 mongoose.connect(process.env.MONGODB_URI as string);
 
@@ -16,6 +18,10 @@ app.use(
     credentials: true,
   })
 );
+
+
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 app.listen(7000, () => {
   console.log("Server started at port 7000");
