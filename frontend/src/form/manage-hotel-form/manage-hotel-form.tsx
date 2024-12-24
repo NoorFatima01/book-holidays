@@ -37,9 +37,9 @@ const ManageHotelForm = ({ onSave, isLoading }: ManageHotelFormProps) => {
     formData.append("starRating", data.starRating.toString());
     formData.append("adultCapacity", data.adultCapacity.toString());
     formData.append("childCapacity", data.childCapacity.toString());
-    data.facilities.forEach((facility, index) => {
-      formData.append(`facilities[${index}]`, facility);
-    });
+    for (let i = 0; i < data.facilities.length; i++) {
+      formData.append("facilities", data.facilities[i]);
+    }
     Array.from(data.imageFiles).forEach((imageFile) => {
       formData.append("imageFiles", imageFile);
     });

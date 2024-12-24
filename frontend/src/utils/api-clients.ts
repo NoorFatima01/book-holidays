@@ -1,7 +1,6 @@
 import { RegisterFormData } from "../pages/register";
 import { SignInFormData } from "../pages/sign-in";
-
-
+import { HotelType } from "../../../backend/src/models/hotel";
 const BASE_URL = "http://localhost:7000";
 
 export const register = async (formData: RegisterFormData) => {
@@ -60,19 +59,31 @@ export const signOut = async () => {
 };
 
 export const addMyHotel = async (formData: FormData) => {
-    const response = await fetch(`${BASE_URL}/api/my-hotels`, {
-        method: "POST",
-        credentials: "include", //to send the cookie
-        body: formData,
-        headers: {
-            // Do not set Content-Type here, it will be automatically set to FormData
-         },
-        
-    });
-    const resBody = await response.json();
+  const response = await fetch(`${BASE_URL}/api/my-hotels`, {
+    method: "POST",
+    credentials: "include", //to send the cookie
+    body: formData,
+    headers: {
+      // Do not set Content-Type here, it will be automatically set to FormData
+    },
+  });
+  const resBody = await response.json();
 
-    if (!response.ok) {
-        throw new Error(resBody.message);
-    }
-    return resBody;
+  if (!response.ok) {
+    throw new Error(resBody.message);
+  }
+  return resBody;
+};
+
+export const getMyHotels = async (): Promise<HotelType[]> => {
+  const response = await fetch(`${BASE_URL}/api/my-hotels`, {
+    method: "GET",
+    credentials: "include", //to send the cookie along with the request
+  });
+  const resBody = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resBody.message);
+  }
+  return resBody;
 };

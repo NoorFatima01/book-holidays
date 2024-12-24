@@ -16,20 +16,23 @@ router.post(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ message: "Bad Request", errors: errors.array() });
+      res
+      .status(400)
+      .json({ message: "Bad Request", errors: errors.array() });
+      return;
     }
 
     try {
       const { email, password } = req.body;
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ message: "Invalid credentials" });
+        res.status(400).json({ message: "Invalid credentials" });
+        return;
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(400).json({ message: "Invalid credentials" });
+        res.status(400).json({ message: "Invalid credentials" });
+        return;
       }
       const token = jwt.sign(
         { userId: user.id },
@@ -45,10 +48,12 @@ router.post(
         maxAge: 1000 * 60 * 60 * 24, //1 day (is same as the duration of expiry of the token)
       });
 
-      return res.status(200).json({ userId:user._id });
+      res.status(200).json({ userId:user._id });
+      return;
     } catch (err) {
       console.log(err);
-      return res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ message: "Internal Server Error" });
+      return;
     }
   }
 );

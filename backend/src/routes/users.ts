@@ -15,7 +15,8 @@ router.post("/register", [
 ],async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()){
-        return res.status(400).json({message:"Bad Request",errors:errors.array()});
+        res.status(400).json({message:"Bad Request",errors:errors.array()});
+        return;
     }
   try {
     const { email, password, firstName, lastName } = req.body;
@@ -24,7 +25,8 @@ router.post("/register", [
       email: email,
     });
     if (user) {
-      return res.status(400).json({ message: "User already exists" });
+      res.status(400).json({ message: "User already exists" });
+      return;
       //400 used for bad requests
     }
     user = new User({
@@ -45,10 +47,12 @@ router.post("/register", [
     })
 
     //no need to write code to send the cookie as the cookie is automatically
-    return res.status(200).json(user);
+    res.status(200).json(user);
+    return;
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
   }
 });
 export default router;
