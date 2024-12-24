@@ -3,11 +3,13 @@ import { Request, Response } from "express";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import mime from "mime-types";
 import { client } from "../index";
-import multer, { Multer } from "multer";
+import multer from "multer";
 import Hotel, { HotelType } from "../models/hotel";
-import { body, validationResult } from "express-validator";
 import verifyToken from "../middleware/auth";
+import { body, validationResult } from "express-validator";
+
 const router = express.Router();
+
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
@@ -15,10 +17,38 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB
   },
 });
+
+async function uploadToBucket(files: Express.Multer.File[]): Promise<string[]> {
+  const uploadedLinks = await Promise.all(
+    files.map(async (file) => {
+      const fileExt = mime.extension(file.mimetype);
+      console.log(file);
+      const fileName = file.originalname;
+      if (!fileExt) {
+        throw new Error("Invalid file type");
+      }
+
+      const newFileName = `${fileName}-${Date.now()}`;
+
+      const params = {
+        Bucket: process.env.S3_BUCKET_NAME as string,
+        Key: `${fileName}-${Date.now()}`,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
+
+      await client.send(new PutObjectCommand(params));
+      return `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${newFileName}`;
+    })
+  );
+
+  return uploadedLinks;
+}
+
 //this will be the root
 router.post(
   "/",
-  verifyToken, //only logged in users can create hotels
+  verifyToken,
   upload.array("imageFiles", 6),
   [
     body("name").notEmpty().withMessage("Name is required"),
@@ -43,48 +73,35 @@ router.post(
       .isNumeric()
       .withMessage("Star rating must be a number"),
     body("facilities")
-      .notEmpty()
-      .isArray()
-      .withMessage("Facilities must be an array"),
+      .custom((value) => {
+        // If it's a single value, convert it to an array
+        const facilitiesArray = Array.isArray(value) ? value : [value];
+        return facilitiesArray.length > 0;
+      })
+      .withMessage("At least one facility is required"),
   ],
   async (req: Request, res: Response) => {
-    console.log("req body");
-    console.log(req.body);
-    console.log("Headers:", req.headers);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res
-        .status(400)
-        .json({ message: "Bad Request", errors: errors.array() });
-      return;
+      res.status(400).json({ message: "Bad Request", errors: errors.array() });
+      return
     }
+
     try {
       const files = req.files as Express.Multer.File[];
-      console.log(files);
-      const promises = files.map(async (file) => {
-        const fileExt = mime.extension(file.mimetype);
-        console.log(file);
-        const fileName = file.originalname;
-        if (!fileExt) {
-          throw new Error("Invalid file type");
-        }
-        const newFileName = `${fileName}-${Date.now()}`;
-        const params = {
-          Bucket: process.env.S3_BUCKET_NAME as string,
-          Key:`${fileName}-${Date.now()}`,
-          Body: file.buffer,
-          ContentType: file.mimetype,
-        };
-        await client.send(new PutObjectCommand(params));
-        const link = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${newFileName}`;
-        return link;
-      });
-      const imageUrls = await Promise.all(promises);
-      console.log("imageUrls", imageUrls);
-      const newHotel: HotelType = req.body;
-      newHotel.imageUrls = imageUrls;
-      newHotel.lastUpdated = new Date();
-      newHotel.userId = req.userId; //this is taken from the auth token
+      const imageUrls = await uploadToBucket(files);
+
+      const newHotel: HotelType = {
+        ...req.body,
+        imageUrls,
+        lastUpdated: new Date(),
+        userId: req.userId,
+        // Ensure facilities is always an array
+        facilities: Array.isArray(req.body.facilities) 
+          ? req.body.facilities 
+          : [req.body.facilities]
+      };
+
       const hotel = new Hotel(newHotel);
       await hotel.save();
       res.status(201).send(hotel);
@@ -98,11 +115,75 @@ router.post(
 router.get("/", verifyToken, async (req: Request, res: Response) => {
   try {
     const hotels = await Hotel.find({ userId: req.userId });
-    res.status(200).send(hotels);
+    res.status(200).json(hotels);
   } catch (error) {
     console.log("error getting hotels", error);
     res.status(500).json({ message: "Error fetching hotels" });
   }
-})
+});
+
+//specific hotel by id
+router.get("/:id", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id.toString();
+    const hotel = await Hotel.findOne({ _id: id, userId: req.userId });
+    if (!hotel) {
+      res.status(404).json({ message: "Hotel not found" });
+      return;
+    }
+    res.status(200).json(hotel);
+  } catch (error) {
+    console.log("error getting hotel", error);
+    res.status(500).json({ message: "Error fetching hotel" });
+    return;
+  }
+});
+
+//update hotel
+router.put(
+  "/:hotelId",
+  verifyToken,
+  upload.array("imageFiles"),
+  async (req: Request, res: Response) => {
+    try {
+      const updatedHotel = req.body;
+      updatedHotel.lastUpdated = new Date();
+
+      const hotel = await Hotel.findOneAndUpdate(
+        { _id: req.params.hotelId, userId: req.userId },
+        updatedHotel,
+        { new: true }
+      );
+
+      if (!hotel) {
+        res.status(400).json("Hotel not found");
+        return;
+      }
+
+      const files = req.files as Express.Multer.File[];
+      const updatedImageUrls = await uploadToBucket(files);
+
+      // Parse the existing imageUrls from the request body
+      let existingImageUrls: string[] = [];
+      if (req.body.imageUrls) {
+        try {
+          existingImageUrls = JSON.parse(req.body.imageUrls);
+        } catch (error) {
+          console.error("Error parsing imageUrls:", error);
+          existingImageUrls = [];
+        }
+      }
+
+      // Combine the new and existing image URLs
+      hotel.imageUrls = [...updatedImageUrls, ...existingImageUrls];
+
+      await hotel.save();
+      res.status(200).json(hotel);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
 
 export default router;
