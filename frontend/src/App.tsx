@@ -3,8 +3,11 @@ import Layout from "./layouts/layout";
 import { BrowserRouter } from "react-router-dom";
 import Register from "./pages/register";
 import SignIn from "./pages/sign-in";
+import AddHotel from "./pages/add-hotel";
+import { useAppContext } from "./context/app-context";
 
 function App() {
+  const { isLogged } = useAppContext();
   return (
     <BrowserRouter>
       {/* <Router> */}
@@ -43,9 +46,19 @@ function App() {
           }
         />
 
+        {isLogged && (
+          <Route
+            path="/add-hotel"
+            element={
+              <Layout>
+                <AddHotel />
+              </Layout>
+            }
+          />
+        )}
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-      <h1>All other</h1>
       {/* </Router> */}
     </BrowserRouter>
   );

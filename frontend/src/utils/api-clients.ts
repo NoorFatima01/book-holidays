@@ -1,6 +1,7 @@
 import { RegisterFormData } from "../pages/register";
 import { SignInFormData } from "../pages/sign-in";
 
+
 const BASE_URL = "http://localhost:7000";
 
 export const register = async (formData: RegisterFormData) => {
@@ -56,4 +57,22 @@ export const signOut = async () => {
   if (!response.ok) {
     throw new Error("Logout failed");
   }
+};
+
+export const addMyHotel = async (formData: FormData) => {
+    const response = await fetch(`${BASE_URL}/api/my-hotels`, {
+        method: "POST",
+        credentials: "include", //to send the cookie
+        body: formData,
+        headers: {
+            // Do not set Content-Type here, it will be automatically set to FormData
+         },
+        
+    });
+    const resBody = await response.json();
+
+    if (!response.ok) {
+        throw new Error(resBody.message);
+    }
+    return resBody;
 };
