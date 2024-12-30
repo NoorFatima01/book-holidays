@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useAppContext } from "../context/app-context";
 import SignOutButton from "./signout-button";
+import ToggleRole from "./toggle-role";
 
 const Header = () => {
-  const { isLogged } = useAppContext();
+  const { isLogged, role } = useAppContext();
+  console.log("role", role);
 
   return (
     <div className="bg-blue-800 py-6">
@@ -14,19 +16,22 @@ const Header = () => {
         <span className="flex space-x-2">
           {isLogged ? (
             <>
-              <Link
-                to="/my-bookings"
-                className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
-              >
-                My Bookings
-              </Link>
-
-              <Link
-                to="/my-hotels"
-                className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
-              >
-                My Hotels
-              </Link>
+              {role === 1 ? (
+                <Link
+                  to="/my-bookings"
+                  className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+                >
+                  My Bookings
+                </Link>
+              ) : (
+                <Link
+                  to="/my-hotels"
+                  className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+                >
+                  My Hotels
+                </Link>
+              )}
+              <ToggleRole />
               <SignOutButton />
             </>
           ) : (
