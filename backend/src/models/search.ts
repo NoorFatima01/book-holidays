@@ -7,3 +7,17 @@ export type HotelSearchResponse = {
     pages: number;
   };
 };
+
+
+export type BookingType = {
+    _id: string;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    adultCapacity: number;
+    childCapacity: number;
+    checkIn: Date;
+    checkOut: Date;
+    totalCost: number;
+  }
