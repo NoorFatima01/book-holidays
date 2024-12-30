@@ -7,13 +7,15 @@ export type UserType = {
     password: string;
     firstName: string;
     lastName: string;
+    role: number[];
 };
 
 const userSchema = new mongoose.Schema({
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
     firstName:{type:String,required:true},
-    lastName:{type:String,required:true}
+    lastName:{type:String,required:true},
+    role:{type: [Number], required: true, default: [0]}
 });
 
 //function to be executed before saving the user to the database

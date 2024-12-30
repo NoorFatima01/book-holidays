@@ -38,7 +38,7 @@ router.post("/register", [
 
     await user.save();
 
-    const token = jwt.sign({userId:user.id}, process.env.JWT_SECRET as string,{expiresIn:"1d"});
+    const token = jwt.sign({userId:user.id, role:user.role}, process.env.JWT_SECRET as string,{expiresIn:"1d"});
 
     res.cookie("authCookie",token,{
         httpOnly:true,
