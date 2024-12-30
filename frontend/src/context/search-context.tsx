@@ -15,17 +15,35 @@ type SearchContextType = {
     hotelId?: string
   ) => void;
 };
+
 type SearchContextProviderProps = {
   children: React.ReactNode;
 };
+
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
+
 export const SearchProvider = ({ children }: SearchContextProviderProps) => {
-  const [destination, setDestination] = useState<string>("");
-  const [checkIn, setCheckIn] = useState<Date>(new Date());
-  const [checkOut, setCheckOut] = useState<Date>(new Date());
-  const [adults, setAdults] = useState<number>(1);
-  const [child, setChildren] = useState<number>(0);
-  const [hotelId, setHotelId] = useState<string>("");
+  const [destination, setDestination] = useState<string>(
+    () => sessionStorage.getItem("destination") || ""
+  );
+  const [checkIn, setCheckIn] = useState<Date>(
+    () =>
+      new Date(sessionStorage.getItem("checkIn") || new Date().toISOString())
+  );
+  const [checkOut, setCheckOut] = useState<Date>(
+    () =>
+      new Date(sessionStorage.getItem("checkOut") || new Date().toISOString())
+  );
+  const [adults, setAdults] = useState<number>(() =>
+    parseInt(sessionStorage.getItem("adults") || "1")
+  );
+  const [child, setChildren] = useState<number>(() =>
+    parseInt(sessionStorage.getItem("children") || "0")
+  );
+  const [hotelId, setHotelId] = useState<string>(
+    () => sessionStorage.getItem("hotelId") || ""
+  );
+
   const saveSearchValues = (
     destination: string,
     checkIn: Date,
@@ -40,7 +58,14 @@ export const SearchProvider = ({ children }: SearchContextProviderProps) => {
     setAdults(adults);
     setChildren(children);
     if (hotelId) setHotelId(hotelId);
+    sessionStorage.setItem("destination", destination);
+    sessionStorage.setItem("checkIn", checkIn.toISOString());
+    sessionStorage.setItem("checkOut", checkOut.toISOString());
+    sessionStorage.setItem("adults", adults.toString());
+    sessionStorage.setItem("children", children.toString());
+    if (hotelId) sessionStorage.setItem("hotelId", hotelId || "");
   };
+
   return (
     <SearchContext.Provider
       value={{

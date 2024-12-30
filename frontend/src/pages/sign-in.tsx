@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../utils/api-clients";
 import { toast } from "react-toastify";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 export type SignInFormData = {
   email: string;
@@ -19,6 +19,7 @@ const SignIn = () => {
   const queryClient = useQueryClient();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const successToast = () =>
     toast.success("Account created successfully", { position: "top-right" });
@@ -28,7 +29,7 @@ const SignIn = () => {
     onSuccess: async () => {
       await queryClient.invalidateQueries("validateToken");
       successToast();
-      navigate("/");
+      navigate(location.state?.from?.pathname || "/");
     },
     onError: () => {
       errorToast();
