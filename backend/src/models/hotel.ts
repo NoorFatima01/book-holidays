@@ -19,7 +19,6 @@ export type HotelType = {
   bookings: BookingType[];
 };
 
-
 const bookingSchema = new mongoose.Schema<BookingType>({
   userId: { type: String, required: true },
   firstName: { type: String, required: true },

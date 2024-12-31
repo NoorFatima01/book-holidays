@@ -10,7 +10,6 @@ const MyHotels = () => {
     "fetchHotels",
     apiClient.getMyHotels,
     {
-      //the response from useQuery is always called data
       onError: (error) => {
         toast.error("Error fetching hotels", { position: "top-right" });
         console.log(error);

@@ -104,6 +104,19 @@ export const getMyHotels = async (): Promise<HotelType[]> => {
   return resBody;
 };
 
+export const getMyBookings = async (): Promise<BookingType[]> => {
+  const response = await fetch(`${BASE_URL}/api/bookings/my-bookings`, {
+    method: "GET",
+    credentials: "include", //to send the cookie along with the request
+  });
+  const resBody = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resBody.message);
+  }
+  return resBody;
+};
+
 export const getMyHotelById = async (hotedId: string): Promise<HotelType> => {
   const response = await fetch(`${BASE_URL}/api/my-hotels/${hotedId}`, {
     method: "GET",

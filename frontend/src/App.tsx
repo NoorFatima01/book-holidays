@@ -10,6 +10,7 @@ import EditHotel from "./pages/edit-hotel";
 import Search from "./pages/search";
 import Detail from "./pages/detail";
 import Booking from "./pages/booking";
+import MyBookings from "./pages/my-bookings";
 
 function App() {
   const { isLogged } = useAppContext();
@@ -21,7 +22,7 @@ function App() {
           path="/"
           element={
             <Layout>
-              <h1>Home</h1>
+              <h1 className="text-center">Home</h1>
             </Layout>
           }
         />
@@ -100,6 +101,16 @@ function App() {
             element={
               <Layout>
                 <Booking />
+              </Layout>
+            }
+          />
+        )}
+        {isLogged && (
+          <Route
+            path="/my-bookings"
+            element={
+              <Layout>
+                <MyBookings />
               </Layout>
             }
           />

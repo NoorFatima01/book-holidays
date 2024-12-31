@@ -20,4 +20,4 @@ export type BookingType = {
     checkIn: Date;
     checkOut: Date;
     totalCost: number;
-  }
+}

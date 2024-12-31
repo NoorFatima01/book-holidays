@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth";
 import { S3Client } from "@aws-sdk/client-s3";
 import myHotelRoutes from "./routes/my-hotels";
 import hotelRoutes from "./routes/hotels";
+import bookingRoutes from './routes/bookings';
 
 mongoose.connect(process.env.MONGODB_URI as string);
 
@@ -35,6 +36,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/my-hotels", myHotelRoutes);
 app.use("/api/hotels",hotelRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.listen(7000, () => {
   console.log("Server started at port 7000");
