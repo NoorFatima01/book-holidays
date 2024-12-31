@@ -1,3 +1,6 @@
+// 0 -> hotel booker
+// 1 -> hotel manager
+
 import { useAppContext } from "../context/app-context";
 
 const ToggleRole = () => {
@@ -6,7 +9,7 @@ const ToggleRole = () => {
   return (
     <div>
       <>
-        {role === 1 ? (
+        {role === 0 ? (
           <button
             onClick={() => {
               updateRole(0);

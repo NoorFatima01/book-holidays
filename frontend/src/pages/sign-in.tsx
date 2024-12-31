@@ -22,7 +22,7 @@ const SignIn = () => {
   const location = useLocation();
 
   const successToast = () =>
-    toast.success("Account created successfully", { position: "top-right" });
+    toast.success("Logged in successfully", { position: "top-right" });
   const errorToast = () => toast.error("Error creating account");
 
   const mutation = useMutation(apiClient.signIn, {

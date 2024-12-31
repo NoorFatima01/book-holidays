@@ -5,6 +5,7 @@ type BookingDetailsSummaryProps = {
   adultCapacity: number;
   childrenCapacity: number;
   noNights: number;
+  totalCost: number;
   hotel: HotelType;
 };
 const BookingDetailsSummary = ({
@@ -13,6 +14,7 @@ const BookingDetailsSummary = ({
   adultCapacity,
   childrenCapacity,
   noNights,
+  totalCost,
   hotel,
 }: BookingDetailsSummaryProps) => {
   return (
@@ -33,6 +35,7 @@ const BookingDetailsSummary = ({
         </div>
         <div className="border-t border-b py-2">
           Number of nights: <div className="font-bold">{noNights}</div>
+          Total Cost: <div className="font-bold">{totalCost}</div>
         </div>
         <div>
           Number of guests:

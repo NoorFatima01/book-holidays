@@ -1,7 +1,7 @@
 import { RegisterFormData } from "../pages/register";
 import { SignInFormData } from "../pages/sign-in";
 import { HotelType } from "../../../backend/src/models/hotel";
-import { HotelSearchResponse } from "../../../backend/src/models/search";
+import { BookingType, HotelSearchResponse } from "../../../backend/src/models/search";
 import { UserType } from "../../../backend/src/models/user";
 
 
@@ -180,6 +180,24 @@ export const fetchHotelById = async (hotelId: string):Promise<HotelType> => {
   const resBody = await response.json();
   if (!response.ok) {
     throw new Error(resBody.message);
+  }
+  return resBody;
+}
+
+export const bookHotelById = async (bookingData: Omit<BookingType, "_id" | "userId">) => {
+  const response = await fetch(`${BASE_URL}/api/bookings/book-hotel`, {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify(bookingData),
+    headers: {
+      "Content-Type": "application/json",
+    }
+  })
+  const resBody = await response.json();
+  console.log('res body is ', resBody)
+  if( resBody.message !== "Hotel booked") {
+    console.log('res body not ok')
+    throw new Error()
   }
   return resBody;
 }
